@@ -1,0 +1,9 @@
+name: go-home
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - bs4
+  - selenium
+prefix: /usr/local/anaconda3/envs/go-home
