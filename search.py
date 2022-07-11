@@ -8,11 +8,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 import webbrowser
 import logging
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
-logging.getLogger('urllib3').setLevel(logging.ERROR)
+from logging.handlers import RotatingFileHandler
 
 
 def create_driver():
@@ -137,7 +133,7 @@ def search_once(driver, date_list, threshold=3000):
     for date in date_list:
         url = get_url(date)
         time.sleep(random.randint(0, 10) / 10)
-        info_list = get_info_list(url, driver)
+        info_list = get_info_list(url, driver, 3)
         if info_list:
             for info in info_list:
                 logging.info(
@@ -182,6 +178,20 @@ def main():
                         help='how many times to repeat the search, the default behavior is to repeat forever')
 
     args = parser.parse_args()
+
+    # Config log
+    os.makedirs('log', exist_ok=True)
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            RotatingFileHandler(
+                'log/flight_prices.log', maxBytes=(1048576 * 5), backupCount=7
+            ),
+            logging.StreamHandler()
+        ])
+    logging.getLogger('urllib3').setLevel(logging.ERROR)
 
     date_list = gen_date_list(args.start_date, args.end_date)
     search(date_list, args.price, args.repeat)
